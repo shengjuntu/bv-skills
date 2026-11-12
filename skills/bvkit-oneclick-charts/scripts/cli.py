@@ -86,12 +86,18 @@ def cmd_guide(args):
 
 def cmd_inspect(args):
     t = str(args.target).strip()
-    if t.lower() in KINDS:
-        ch = resolve_kind(t)
-        print("kind %s -> chapter %s" % (t.lower(), ch))
-    else:
-        ch = t.zfill(2)
-    rd, task = route(ch)
+    try:
+        if t.lower() in KINDS:
+            ch = resolve_kind(t.lower())
+            print("kind %s -> chapter %s" % (t.lower(), ch))
+        else:
+            ch = t.zfill(2)
+        rd, task = route(ch)
+    except KeyError:
+        raise BVError(
+            "不认识 %r。可用图表类型（kind）: %s；也可以直接给章节号 01-20。"
+            "跑 `cli.py guide` 看每种类型需要什么数据。" % (t, ", ".join(sorted(KINDS)))
+        )
     print("chapter %s -> renderer %s" % (ch, rd))
     print("task: %s" % task)
     print("rules:")
