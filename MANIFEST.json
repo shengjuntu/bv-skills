@@ -15,6 +15,21 @@
       "cli": ["list", "inspect", "validate", "review", "render", "selftest"]
     }
   ],
+  "layout": {
+    "root": "SKILL.md at package root",
+    "subdirs": ["references", "scripts"],
+    "note": "bvkit/ 与 examples/ 不在 WorkBuddy 白名单，分别归入 scripts/bvkit 与 references/examples"
+  },
+  "market": {
+    "platform": "workbuddy",
+    "upload_zip": "workbuddy-bvkit-oneclick-charts.zip (root = SKILL.md, references/, scripts/)",
+    "required_fields": [
+      "name", "display_name", "display_name_en", "description",
+      "description_zh", "description_en", "version", "author"
+    ],
+    "selfcheck": "python3 scripts/check_skill.py <skill-dir>",
+    "entry": "https://open.workbuddy.cn/skill/all"
+  },
   "chapter_map": {
     "01": "review", "02": "timeseries", "03": "wordcloud", "04": "matrix",
     "05": "geo", "06": "geo", "07": "network", "08": "network",
@@ -27,10 +42,16 @@
     "optional": {"networkx": "07/08/10", "wordcloud": "03", "pandas+openpyxl": "xlsx 输入"},
     "fonts": "任一 CJK 字体（wqy-microhei / Noto CJK / msyh）"
   },
+  "permissions": {
+    "read": ["spec 指定的数据文件", "references/"],
+    "write": ["spec.out 前缀产物与 audit"],
+    "network": "none"
+  },
   "verification": {
     "selftest_samples": 13,
     "negative_checks": 5,
-    "rounds": 5,
-    "final": "13/13 pass, 5/5 negative pass, 13 png 目检通过"
+    "rounds": 7,
+    "final": "13/13 pass, 5/5 negative pass, 5 examples exit=0, 27/27 sha256 OK on clean checkout",
+    "workbuddy_package": "root=SKILL.md; check_skill PASS; selftest 13/13; 5 examples exit=0"
   }
 }

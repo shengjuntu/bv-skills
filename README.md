@@ -1,6 +1,6 @@
 # bv-skills v2.0.0
 
-把 `beautiful-visualization-skills-v1.0.0`（1 个路由工作台 + bv-01~bv-20）重组为**一个可执行的 skill + 8 个渲染器 + 审计产物**。
+把 `beautiful-visualization-skills-v1.0.0`（1 个路由工作台 + bv-01~bv-20）重组为**一个可执行的 skill + 10 个渲染器 + 审计产物**。
 
 原包 21 个 skill 里 0 个 `.py/.sh/.js`，20 章方法是纯文档，执行时靠人读懂再手写脚本。
 v2.0.0 保留方法中的可判定部分并固化为代码，其余（分析判断、数据选期）仍由调用方决定。
@@ -10,8 +10,8 @@ v2.0.0 保留方法中的可判定部分并固化为代码，其余（分析判�
 ```
 bv-skills-v2.0.0/
 └── skills/bvkit-oneclick-charts/
-    ├── SKILL.md                 # agent 入口：触发场景、命令、spec 格式、错误码
-    ├── bvkit/                   # python 包（10 个模块）
+    ├── SKILL.md                 # agent 入口 + 市场字段（WorkBuddy 8 个必填项已齐）
+    ├── scripts/bvkit/           # python 包（10 个模块）
     │   ├── core.py              # 字体探测/调色板/audit/导出
     │   ├── validate.py          # 编码、类型、年月、缺失、重复、越界
     │   ├── routes.py            # 20 章 → renderer + 每章口径规则
@@ -22,10 +22,13 @@ bv-skills-v2.0.0/
     │   └── cli.py               # list/inspect/validate/review/render/selftest
     ├── references/
     │   ├── chapters.md          # 20 章 → 图元 → 参数 → 必做口径
-    │   ├── params.md            # 8 个渲染器参数表
-    │   └── errors.md            # 错误码、退出码、"图不对但不报错"排查
-    └── examples/                # 5 份可跑 spec + 4 份数据
+    │   ├── params.md            # 10 个渲染器参数表
+    │   ├── errors.md            # 错误码、退出码、"图不对但不报错"排查
+    │   └── examples/            # 5 份可跑 spec + 4 份数据
+    └── scripts/check_skill.py   # 按 WorkBuddy 规范自检本包
 ```
+
+目录取舍：`bvkit/`、`examples/` 顶层目录名不在 WorkBuddy 白名单内，因此分别归入 `scripts/` 与 `references/`；`SKILL.md` 位于包根层，打包时 zip 解开第一层即是它。
 
 ## 装什么
 
@@ -44,8 +47,9 @@ sudo apt-get install -y fonts-wqy-microhei    # 或把 ttc 放到 ~/.local/share
 
 ```bash
 cd skills/bvkit-oneclick-charts
-PYTHONPATH=. python -m bvkit selftest --workdir /tmp/bvkit_selftest
-PYTHONPATH=. python -m bvkit render --spec examples/ex02_narrative.json
+python3 scripts/check_skill.py .                          # 市场格式自检
+PYTHONPATH=scripts python3 -m bvkit selftest --workdir /tmp/bvkit_selftest
+PYTHONPATH=scripts python3 -m bvkit render --spec references/examples/ex02_narrative.json
 ```
 
 `selftest` 会产出 13 张图 + 2 个附件（wav/gif），并跑 5 个反例：
