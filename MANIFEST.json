@@ -33,13 +33,16 @@
     "entry": "https://open.workbuddy.cn/skill/all",
     "submitted": {
       "skill_id": "os_d3402337d1449c2e",
+      "market_skill_id": "skill_2120874585747382272",
       "display_name": "bvkit 一键出图",
       "market_category": "数据分析",
       "service_category": "工具 - 图片处理",
       "price": "免费",
-      "status": "审核中",
+      "status": "已发布（公开）",
       "submitted_at": "2026-11-12 18:28",
-      "review_window": "7 个工作日"
+      "published_at": "2026-11-12 21:41",
+      "review_window": "7 个工作日（实际当日通过）",
+      "developer": "上海老涂"
     }
   },
   "chapter_map": {
