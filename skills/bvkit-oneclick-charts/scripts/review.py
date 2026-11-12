@@ -4,7 +4,7 @@
 1) 渲染前静态评审 spec，挡掉会在图上犯的错误（双轴、截断基线、缺口径…）；
 2) 渲染后复核 audit，检查每章必做项是否真的落到了产物里。
 """
-from .routes import RULE_DOC, rules_for
+from routes import RULE_DOC, rules_for
 
 
 def review_spec(spec, data_report=None):

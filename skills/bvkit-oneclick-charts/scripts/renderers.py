@@ -8,8 +8,8 @@ import wave
 
 import numpy as np
 
-from .core import BVError, BVSpecError, color, new_audit
-from .validate import parse_period
+from core import BVError, BVSpecError, color, new_audit
+from validate import parse_period
 
 SEED = 42
 

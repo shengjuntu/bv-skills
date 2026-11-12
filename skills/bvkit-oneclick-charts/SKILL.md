@@ -42,18 +42,18 @@ sudo apt-get install -y fonts-wqy-microhei    # 或把 ttc 放到 ~/.local/share
 
 ## 怎么调
 
-代码在 `scripts/bvkit`，用 `PYTHONPATH` 指到 `scripts` 后以模块方式运行：
+代码在 `scripts/`，入口是 `scripts/cli.py`，在**技能根目录**执行：
 
 ```bash
-PYTHONPATH=scripts python3 -m bvkit list                        # 20 章 → renderer 映射
-PYTHONPATH=scripts python3 -m bvkit inspect 02                  # 某章的口径必做项
-PYTHONPATH=scripts python3 -m bvkit validate --data x.csv       # 只做数据核验
-PYTHONPATH=scripts python3 -m bvkit review --spec s.json        # 只做静态评审
-PYTHONPATH=scripts python3 -m bvkit render --spec s.json        # 核验 + 评审 + 出图 + 审计
-PYTHONPATH=scripts python3 -m bvkit selftest --workdir /tmp/bv  # 13 个内置样例 + 5 个反例
+python3 scripts/cli.py list                        # 20 章 → renderer 映射
+python3 scripts/cli.py inspect 02                  # 某章的口径必做项
+python3 scripts/cli.py validate --data x.csv       # 只做数据核验
+python3 scripts/cli.py review --spec s.json        # 只做静态评审
+python3 scripts/cli.py render --spec s.json        # 核验 + 评审 + 出图 + 审计
+python3 scripts/cli.py selftest --workdir /tmp/bv  # 13 个内置样例 + 5 个反例
 ```
 
-不要在仓库外直接 `python -m bvkit`——`bvkit` 不在 site-packages，必须经 `PYTHONPATH`。
+无需 `PYTHONPATH`、无需安装：`cli.py` 与同目录模块互相 import，Python 会把脚本所在目录放进 `sys.path`。从别处调用时用绝对路径 `python3 /path/to/skill/scripts/cli.py ...`。
 
 ## spec 格式
 
@@ -111,7 +111,7 @@ PYTHONPATH=scripts python3 -m bvkit selftest --workdir /tmp/bv  # 13 个内置�
 | 18 | volume | 三正交切片 |
 | 19 | animation | GIF + 静态替代 |
 
-完整参数见 `references/params.md`，章节任务原文见 `references/chapters.md`，可跑示例见 `references/examples/`。
+完整参数见 `references/params.md`，章节任务原文见 `references/chapters.md`，可跑示例见 `references/examples.md`（spec 与数据都在 `references/` 下平铺）。
 
 ## 审计产物
 

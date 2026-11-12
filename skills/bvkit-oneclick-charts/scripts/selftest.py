@@ -5,10 +5,10 @@ import sys
 
 import numpy as np
 
-from .cli import ALL_RENDERERS, _resolve, cmd_render
-from .core import setup_style
-from .review import format_findings, review_spec
-from .validate import load_table, validate
+from cli import ALL_RENDERERS, _resolve, cmd_render
+from core import setup_style
+from review import format_findings, review_spec
+from validate import load_table, validate
 
 
 def _w(path, obj):
@@ -203,9 +203,9 @@ def main(workdir="/tmp/bvkit_selftest"):
                 p.setdefault("font_path", style["font_path"])
             fig, audit = ALL_RENDERERS[renderer](rows, p, spec, meta)
             if report:
-                from .validate import to_audit_checks
+                from validate import to_audit_checks
                 audit["checks"].update(to_audit_checks(report))
-            from .core import export, write_audit
+            from core import export, write_audit
             written = export(fig, base, formats=spec.get("formats") or ["png"])
             write_audit(audit, base)
             extra = [x for x in (audit.get("dropped") or []) if x.startswith(("wav:", "gif:"))]

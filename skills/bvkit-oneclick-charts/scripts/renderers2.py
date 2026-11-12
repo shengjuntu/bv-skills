@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from .core import BVSpecError, new_audit
+from core import BVSpecError, new_audit
 
 
 def render_scatter(rows, p, spec, meta):

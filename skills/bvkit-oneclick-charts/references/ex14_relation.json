@@ -3,7 +3,7 @@
   "out": "out/bv14_relation",
   "title": "业务流程期望关系 vs 实际记录",
   "note": "示例数据：3 个期望关系在实际记录里缺失",
-  "data": {"path": "data/relation.csv"},
+  "data": {"path": "relation.csv"},
   "params": {
     "rows": "src",
     "cols": "dst",

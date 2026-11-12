@@ -10,6 +10,7 @@ Rules checked
   4. no half-width "colon+space" inside description values (breaks YAML)
   5. examples_zh / examples_en hold at most 3 items
   6. top-level entries stay inside the allowed whitelist
+  7. directory depth <= 2 (root/<dir>/<file>) — deeper nesting fails the market parser
 
 Exit code 0 = all checks pass, 1 = at least one problem.
 """
@@ -122,6 +123,19 @@ def main():
         if e in WHITELIST and e != "SKILL.md" and not os.path.isdir(os.path.join(root, e)):
             fails.append("%s should be a directory" % e)
 
+    deep = []
+    for dirpath, dirnames, filenames in os.walk(root):
+        rel = os.path.relpath(dirpath, root)
+        if rel == ".":
+            continue
+        level = len(rel.split(os.sep))
+        if level > 1:
+            deep.append(rel)
+    if deep:
+        fails.append(
+            "directory nesting exceeds 2 levels (root/<dir>/<file>): %s" % ", ".join(sorted(deep))
+        )
+
     print("package root : %s" % root)
     print("folder name  : %s" % folder)
     print("declared name: %s" % fm.get("name"))
@@ -129,7 +143,7 @@ def main():
     for n in notes:
         print("[note] %s" % n)
     if not fails:
-        print("[PASS] 8 required fields present, whitelist clean, description safe, examples <= 3")
+        print("[PASS] 8 required fields present, whitelist clean, description safe, examples <= 3, depth <= 2")
         return 0
     for f in fails:
         print("[FAIL] %s" % f)

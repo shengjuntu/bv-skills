@@ -13,7 +13,7 @@ import json
 import os
 import re
 
-from .core import BVDataError, new_audit
+from core import BVDataError, new_audit
 
 YM_PAT = re.compile(r"^(19|20)\d{2}[.\-/]\d{1,2}$")
 YM_COMPACT = re.compile(r"^(19|20)\d{2}(0[1-9]|1[0-2])$")

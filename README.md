@@ -11,7 +11,7 @@ v2.0.0 保留方法中的可判定部分并固化为代码，其余（分析判�
 bv-skills-v2.0.0/
 └── skills/bvkit-oneclick-charts/
     ├── SKILL.md                 # agent 入口 + 市场字段（WorkBuddy 8 个必填项已齐）
-    ├── scripts/bvkit/           # python 包（10 个模块）
+    ├── scripts/                 # 10 个模块平铺 + 自检脚本（无子目录）
     │   ├── core.py              # 字体探测/调色板/audit/导出
     │   ├── validate.py          # 编码、类型、年月、缺失、重复、越界
     │   ├── routes.py            # 20 章 → renderer + 每章口径规则
@@ -19,16 +19,18 @@ bv-skills-v2.0.0/
     │   ├── renderers2.py        # scatter/wordcloud
     │   ├── review.py            # 渲染前静态评审 + 渲染后规则复核
     │   ├── selftest.py          # 13 个样例 + 5 个反例
-    │   └── cli.py               # list/inspect/validate/review/render/selftest
-    ├── references/
-    │   ├── chapters.md          # 20 章 → 图元 → 参数 → 必做口径
-    │   ├── params.md            # 10 个渲染器参数表
-    │   ├── errors.md            # 错误码、退出码、"图不对但不报错"排查
-    │   └── examples/            # 5 份可跑 spec + 4 份数据
-    └── scripts/check_skill.py   # 按 WorkBuddy 规范自检本包
+    │   ├── cli.py               # list/inspect/validate/review/render/selftest（入口）
+    │   └── check_skill.py       # 按 WorkBuddy 规范自检本包
+    └── references/
+        ├── chapters.md          # 20 章 → 图元 → 参数 → 必做口径
+        ├── params.md            # 10 个渲染器参数表
+        ├── errors.md            # 错误码、退出码、"图不对但不报错"排查
+        ├── examples.md          # 5 份可跑 spec 的运行说明
+        ├── ex*.json             # 5 份 spec
+        └── *.csv                # 4 份示例数据
 ```
 
-目录取舍：`bvkit/`、`examples/` 顶层目录名不在 WorkBuddy 白名单内，因此分别归入 `scripts/` 与 `references/`；`SKILL.md` 位于包根层，打包时 zip 解开第一层即是它。
+目录取舍：`bvkit/`、`examples/` 顶层目录名不在 WorkBuddy 白名单内；且市场解析器**只接受两级目录**（根/一级/文件），三级会被判「目录层级超限」。因此 python 模块直接平铺到 `scripts/`（模块间用同目录 `import`，入口 `scripts/cli.py`），spec 与 csv 平铺到 `references/`。`SKILL.md` 位于包根层，zip 解开第一层即是它。
 
 ## 装什么
 
@@ -47,9 +49,9 @@ sudo apt-get install -y fonts-wqy-microhei    # 或把 ttc 放到 ~/.local/share
 
 ```bash
 cd skills/bvkit-oneclick-charts
-python3 scripts/check_skill.py .                          # 市场格式自检
-PYTHONPATH=scripts python3 -m bvkit selftest --workdir /tmp/bvkit_selftest
-PYTHONPATH=scripts python3 -m bvkit render --spec references/examples/ex02_narrative.json
+python3 scripts/check_skill.py .                          # 市场格式自检（含目录层级）
+python3 scripts/cli.py selftest --workdir /tmp/bvkit_selftest
+python3 scripts/cli.py render --spec references/ex02_narrative.json
 ```
 
 `selftest` 会产出 13 张图 + 2 个附件（wav/gif），并跑 5 个反例：
@@ -77,6 +79,23 @@ PYTHONPATH=scripts python3 -m bvkit render --spec references/examples/ex02_narra
 每轮都取回 PNG 逐张目检，不是只看 PASS。当前 13 张全部通过目检。
 
 **没做的验证**：色盲模拟（只有色板约束，没有模拟渲染）、体数据的独立重建对照、音高的盲听辨识。这三项在 audit 的 `limits` 里写明。
+
+## WorkBuddy 提交记录
+
+| 项 | 值 |
+| --- | --- |
+| 平台 | open.workbuddy.cn 技能市场 |
+| 技能 ID | `os_d3402337d1449c2e` |
+| 市场展示名称 | bvkit 一键出图 |
+| 市场展示分类 | 数据分析 |
+| 服务类目 | 工具 - 图片处理 |
+| 价格 | 免费 |
+| 版本 | v2.0.0 |
+| 状态 | 审核中（预计 7 个工作日出结果） |
+| 提交时间 | 2026-11-12 18:28 |
+
+上传包是 `workbuddy-bvkit-oneclick-charts.zip`（根层 = `SKILL.md` + `references/` + `scripts/`，46.4 KB）。
+首轮上传曾失败在「目录层级超限 — 仅支持两级目录」，平铺后解析通过并生成技能 ID。
 
 ## 与原包的关系
 

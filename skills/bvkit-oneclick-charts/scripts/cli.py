@@ -4,13 +4,12 @@ import json
 import os
 import sys
 
-from . import VERSION
-from .core import BVError, export, setup_style, write_audit
-from .renderers import RENDERERS
-from .renderers2 import render_scatter, render_wordcloud
-from .review import format_findings, review_audit, review_spec
-from .routes import ROUTES, rules_for, route
-from .validate import load_table, print_report, to_audit_checks, validate
+from core import BVError, VERSION, export, setup_style, write_audit
+from renderers import RENDERERS
+from renderers2 import render_scatter, render_wordcloud
+from review import format_findings, review_audit, review_spec
+from routes import ROUTES, rules_for, route
+from validate import load_table, print_report, to_audit_checks, validate
 
 ALL_RENDERERS = dict(RENDERERS)
 ALL_RENDERERS["scatter"] = render_scatter
@@ -69,7 +68,7 @@ def cmd_inspect(args):
 
 
 def RULE_DOC_TEXT(rule):
-    from .routes import RULE_DOC
+    from routes import RULE_DOC
     return RULE_DOC.get(rule, rule)
 
 
@@ -162,7 +161,7 @@ def cmd_review(args):
 
 
 def cmd_selftest(args):
-    from .selftest import main as selftest_main
+    from selftest import main as selftest_main
     return selftest_main(args.workdir)
 
 
@@ -205,3 +204,7 @@ def main(argv=None):
     except BVError as e:
         print("[%s] %s" % (e.code, e), file=sys.stderr)
         return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

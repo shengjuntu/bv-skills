@@ -6,7 +6,7 @@
   "note": "示例数据（5 个时间点），用于演示「问题 + 背景」结构",
   "date_format": "ym",
   "date_columns": ["ym"],
-  "data": {"path": "data/narrative.csv"},
+  "data": {"path": "narrative.csv"},
   "params": {
     "x": "ym",
     "series": [{"name": "月活（万）", "y": "v"}],
