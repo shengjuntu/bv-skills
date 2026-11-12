@@ -1,0 +1,18 @@
+{
+  "kind": "network",
+  "out": "out/ex_network",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：人员共现网络（threshold=2 过滤一次性搭档）",
+  "note": "示例数据；0 度节点单独归置",
+  "data": {
+    "path": "affiliation.csv"
+  },
+  "params": {
+    "source": "a",
+    "target": "b",
+    "weight": "w",
+    "threshold": 2
+  }
+}

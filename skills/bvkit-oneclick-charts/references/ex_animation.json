@@ -1,0 +1,19 @@
+{
+  "kind": "animation",
+  "out": "out/ex_animation",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：40 点平移的 12 帧动画（附起止帧静态替代）",
+  "note": "合成轨迹；seed=42，同帧同色同大小",
+  "data": {
+    "rows": []
+  },
+  "params": {
+    "points": 40,
+    "frames": 12,
+    "fps": 8,
+    "dx": 1.4,
+    "dy": 0.6
+  }
+}

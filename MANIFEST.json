@@ -1,6 +1,6 @@
 {
   "name": "bv-skills",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "date": "2026-11-12",
   "lang": "zh-CN",
   "derived_from": "beautiful-visualization-skills-v1.0.0",
@@ -13,14 +13,25 @@
       "entry": "SKILL.md",
       "runtime": "python3",
       "renderers": 10,
-      "cli": ["guide", "list", "inspect", "validate", "review", "render", "selftest"],
+      "cli": [
+        "guide",
+        "list",
+        "inspect",
+        "validate",
+        "review",
+        "render",
+        "selftest"
+      ],
       "entry_style": "按图表意图（kind）调用；chapter 仅作内部溯源与精确复刻入口",
       "kinds": 17
     }
   ],
   "layout": {
     "root": "SKILL.md at package root",
-    "subdirs": ["references", "scripts"],
+    "subdirs": [
+      "references",
+      "scripts"
+    ],
     "depth_limit": "root/<dir>/<file> only — the market parser rejects deeper nesting",
     "flat": "python modules flattened into scripts/ (entry scripts/cli.py), specs and csv flattened into references/",
     "note": "bvkit/ 与 examples/ 不在 WorkBuddy 白名单，且三级目录会被判「目录层级超限」，故平铺"
@@ -29,8 +40,14 @@
     "platform": "workbuddy",
     "upload_zip": "workbuddy-bvkit-oneclick-charts.zip (root = SKILL.md, references/, scripts/)",
     "required_fields": [
-      "name", "display_name", "display_name_en", "description",
-      "description_zh", "description_en", "version", "author"
+      "name",
+      "display_name",
+      "display_name_en",
+      "description",
+      "description_zh",
+      "description_en",
+      "version",
+      "author"
     ],
     "selfcheck": "python3 scripts/check_skill.py <skill-dir>",
     "entry": "https://open.workbuddy.cn/skill/all",
@@ -63,38 +80,108 @@
           "新增 references/ex_kind_trend.json 演示 kind 用法；版本升 2.1.0"
         ],
         "unchanged": "name 保持 bvkit-oneclick-charts，以免破坏已发布资产的版本更新关系"
+      },
+      {
+        "version": "2.1.1",
+        "display_name": "数据图表一键出图",
+        "date": "2026-11-12",
+        "status": "未提交（GitHub 先行；市场侧 v2.1.0 仍在审核）",
+        "why": "例子只覆盖 5 个类型，且是补充样例而非说明书",
+        "changes": [
+          "17 个 kind 各一份可跑 spec（references/ex_<kind>.json + 自带 csv），另保留 1 份 chapter 写法，共 18 份",
+          "references/examples.md 重写为按「我想看什么」检索的说明书：数据形状、该看到什么、换数据改哪几行",
+          "修 render_multimodal 把 csv 字符串直接参与音高计算导致的 TypeError",
+          "修 render --spec 遇到 review（01/20 章）报 unknown renderer；改为只评审不产图，exit 0/2",
+          "修 review/validate 不按 spec 目录解析 data.path",
+          "矩阵按底色亮度自动取黑/白字，关闭穿过色块的网格线，轴标签把 0.0 显示为 0",
+          "矩阵轴顺序改为「数值轴升序、文本轴首现」，不再按中文码点排",
+          "小倍数把「整行缺失」也标为未采集，并在缺失处插入 NaN 点真正断线（原先会跨点直连）",
+          "渲染器图内补写音高映射公式；similarity 改为与 network 同数据、只改阈值以演示阈值敏感性"
+        ],
+        "unchanged": "name 保持 bvkit-oneclick-charts；kind_map / chapter_map 不变"
       }
     ]
   },
   "kind_map": {
-    "trend": "02", "heatmap": "12", "compare": "14", "matrix": "04",
-    "cooccurrence": "15", "window_heatmap": "16", "network": "07",
-    "similarity": "08", "scatter": "09", "facets": "13", "route": "06",
-    "map": "05", "wordcloud": "03", "volume": "18", "animation": "19",
-    "soundmap": "17", "review": "01"
+    "trend": "02",
+    "heatmap": "12",
+    "compare": "14",
+    "matrix": "04",
+    "cooccurrence": "15",
+    "window_heatmap": "16",
+    "network": "07",
+    "similarity": "08",
+    "scatter": "09",
+    "facets": "13",
+    "route": "06",
+    "map": "05",
+    "wordcloud": "03",
+    "volume": "18",
+    "animation": "19",
+    "soundmap": "17",
+    "review": "01"
   },
   "chapter_map": {
-    "01": "review", "02": "timeseries", "03": "wordcloud", "04": "matrix",
-    "05": "geo", "06": "geo", "07": "network", "08": "network",
-    "09": "scatter", "10": "network", "11": "timeseries", "12": "matrix",
-    "13": "smallmultiples", "14": "matrix", "15": "matrix", "16": "matrix",
-    "17": "multimodal", "18": "volume", "19": "animation", "20": "review"
+    "01": "review",
+    "02": "timeseries",
+    "03": "wordcloud",
+    "04": "matrix",
+    "05": "geo",
+    "06": "geo",
+    "07": "network",
+    "08": "network",
+    "09": "scatter",
+    "10": "network",
+    "11": "timeseries",
+    "12": "matrix",
+    "13": "smallmultiples",
+    "14": "matrix",
+    "15": "matrix",
+    "16": "matrix",
+    "17": "multimodal",
+    "18": "volume",
+    "19": "animation",
+    "20": "review"
   },
   "requirements": {
-    "required": ["python>=3.9", "matplotlib", "numpy"],
-    "optional": {"networkx": "07/08/10", "wordcloud": "03", "pandas+openpyxl": "xlsx 输入"},
+    "required": [
+      "python>=3.9",
+      "matplotlib",
+      "numpy"
+    ],
+    "optional": {
+      "networkx": "07/08/10",
+      "wordcloud": "03",
+      "pandas+openpyxl": "xlsx 输入"
+    },
     "fonts": "任一 CJK 字体（wqy-microhei / Noto CJK / msyh）"
   },
   "permissions": {
-    "read": ["spec 指定的数据文件", "references/"],
-    "write": ["spec.out 前缀产物与 audit"],
+    "read": [
+      "spec 指定的数据文件",
+      "references/"
+    ],
+    "write": [
+      "spec.out 前缀产物与 audit"
+    ],
     "network": "none"
   },
   "verification": {
     "selftest_samples": 13,
     "negative_checks": 5,
-    "rounds": 7,
-    "final": "13/13 pass, 5/5 negative pass, 6 examples exit=0, 25/25 sha256 OK on clean checkout",
-    "workbuddy_package": "root=SKILL.md; check_skill PASS; selftest 13/13; 6 examples exit=0; kind 路径出图并触发 3 条口径复核"
+    "examples": 18,
+    "examples_result": "17 个 kind 全部 exit=0；ex_review 只打印评审清单（无图）",
+    "visual_inspection": "16 张 PNG 逐张目检（review 不产图）",
+    "package_check": "check_skill.py PASS（8 个必填字段 / 白名单 / 目录 ≤2 层）",
+    "final": "check_skill PASS; selftest 13/13 + 5/5 反例 PASS; 17 例 exit=0; 16 张图目检通过",
+    "limits": "色盲模拟、体数据独立重建、音高盲听未做，写在 audit 的 limits 里"
+  },
+  "examples": {
+    "index": "skills/bvkit-oneclick-charts/references/examples.md",
+    "specs": 18,
+    "kinds_covered": 17,
+    "chapter_example": "ex02_narrative.json",
+    "data_files": 11,
+    "rule": "例子即说明书：每份 spec 自带数据、可单独跑通、只放必需参数 + 一个体现口径的可选项"
   }
 }

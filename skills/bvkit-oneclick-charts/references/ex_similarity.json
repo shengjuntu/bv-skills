@@ -1,0 +1,18 @@
+{
+  "kind": "similarity",
+  "out": "out/ex_similarity",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：阈值放宽到 1（一次性连接进来，结构从两派变连通）",
+  "note": "示例数据；与 ex_network 同一份数据、只改阈值，用来演示阈值敏感性",
+  "data": {
+    "path": "affiliation.csv"
+  },
+  "params": {
+    "source": "a",
+    "target": "b",
+    "weight": "w",
+    "threshold": 1
+  }
+}

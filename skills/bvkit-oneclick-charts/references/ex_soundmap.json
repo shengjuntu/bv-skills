@@ -1,0 +1,18 @@
+{
+  "kind": "soundmap",
+  "out": "out/ex_soundmap",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：五个指标的视觉—音高映射（可导出 wav）",
+  "note": "示例数值；音高 = 220 + 4×值（Hz）",
+  "data": {
+    "path": "snd_metric.csv"
+  },
+  "params": {
+    "pitch_base": 220,
+    "pitch_gain": 4,
+    "write_wav": true,
+    "sample_rate": 22050
+  }
+}

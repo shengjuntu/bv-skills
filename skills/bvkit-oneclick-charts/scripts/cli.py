@@ -44,7 +44,7 @@ def _resolve(spec, spec_dir=None):
     renderer = spec.get("renderer")
     if not renderer:
         renderer, _task = route(chapter)
-    if renderer not in ALL_RENDERERS:
+    if renderer not in ALL_RENDERERS and renderer != "review":
         raise BVError("unknown renderer %r; available: %s" % (renderer, sorted(ALL_RENDERERS)))
     data = spec.get("data") or {}
     path = data.get("path")
@@ -111,6 +111,14 @@ def RULE_DOC_TEXT(rule):
     return RULE_DOC.get(rule, rule)
 
 
+def _data_path(path, spec_path, data):
+    """相对 data.path：先按 cwd 找，找不到再按 spec 所在目录找。"""
+    if not path or os.path.isabs(path) or os.path.exists(path):
+        return path
+    cand = os.path.join(os.path.dirname(os.path.abspath(spec_path)), path)
+    return cand if os.path.exists(cand) else path
+
+
 def cmd_validate(args):
     spec = _load_spec(args.spec) if args.spec else {}
     if spec.get("kind") or spec.get("chart"):
@@ -122,6 +130,8 @@ def cmd_validate(args):
     path = args.data or data.get("path")
     if not path:
         raise BVError("validate needs --data or spec.data.path")
+    if args.spec:
+        path = _data_path(path, args.spec, data)
     rows, meta = load_table(path, sheet=(data.get("sheet") if data else None))
     report, prepared = validate(rows, spec=spec, meta=meta)
     print_report(report)
@@ -138,6 +148,17 @@ def cmd_validate(args):
 def cmd_render(args):
     spec = _load_spec(args.spec)
     chapter, renderer, rows, meta = _resolve(spec, os.path.dirname(os.path.abspath(args.spec)))
+    if renderer == "review":
+        # 01/20 的产出是文字结论，不走绘图通道
+        report = None
+        if rows:
+            report, _prep = validate(rows, spec=spec, meta=meta)
+        findings = review_spec(dict(spec, renderer=renderer, chapter=chapter), report)
+        if report:
+            print_report(report)
+            print()
+        print(format_findings(findings))
+        return 2 if [f for f in findings if f["level"] == "error"] else 0
     style = setup_style(spec.get("font_path"), dpi=int(spec.get("dpi", 140)))
 
     report = None
@@ -199,7 +220,7 @@ def cmd_review(args):
     data = spec.get("data") or {}
     report = None
     if data.get("path"):
-        rows, meta = load_table(data["path"], sheet=data.get("sheet"))
+        rows, meta = load_table(_data_path(data["path"], args.spec, data), sheet=data.get("sheet"))
         report, _ = validate(rows, spec=spec, meta=meta)
     findings = review_spec(spec, report)
     if report:

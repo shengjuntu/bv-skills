@@ -1,0 +1,31 @@
+{
+  "kind": "trend",
+  "out": "out/ex_trend",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：月度规模走势（下方事件按真实时间对齐）",
+  "note": "示例数据，5 个时间点",
+  "date_format": "ym",
+  "date_columns": [
+    "ym"
+  ],
+  "data": {
+    "path": "narrative.csv"
+  },
+  "params": {
+    "x": "ym",
+    "series": [
+      {
+        "name": "月活（万）",
+        "y": "v"
+      }
+    ],
+    "events": {
+      "col": "event",
+      "at": "ym",
+      "cat": "cat"
+    },
+    "y_label": "万"
+  }
+}

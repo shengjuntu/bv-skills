@@ -1,0 +1,18 @@
+{
+  "kind": "wordcloud",
+  "out": "out/ex_wordcloud",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：术语词云（右侧给权重核对）",
+  "note": "示例频次；面积只在本语料内可比",
+  "data": {
+    "path": "wc_term.csv"
+  },
+  "params": {
+    "word": "term",
+    "count": "weight",
+    "top": 12,
+    "max_words": 60
+  }
+}

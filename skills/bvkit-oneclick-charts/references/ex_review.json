@@ -1,0 +1,22 @@
+{
+  "kind": "review",
+  "out": "out/ex_review",
+  "title": "示例：只评审不产图（拿一张现有 spec 做体检）",
+  "note": "示例数据；输出是评审清单，没有图片产物",
+  "date_format": "ym",
+  "date_columns": [
+    "ym"
+  ],
+  "data": {
+    "path": "narrative.csv"
+  },
+  "params": {
+    "x": "ym",
+    "series": [
+      {
+        "name": "月活（万）",
+        "y": "v"
+      }
+    ]
+  }
+}

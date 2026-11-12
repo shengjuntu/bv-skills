@@ -1,0 +1,17 @@
+{
+  "kind": "cooccurrence",
+  "out": "out/ex_cooccurrence",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：实体共现矩阵（对角线为 0）",
+  "note": "示例数据；采集完整性未核，需人工复核",
+  "data": {
+    "path": "cooc_pair.csv"
+  },
+  "params": {
+    "rows": "row",
+    "cols": "col",
+    "value": "count"
+  }
+}

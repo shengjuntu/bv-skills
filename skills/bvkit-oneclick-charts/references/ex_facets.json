@@ -1,0 +1,18 @@
+{
+  "kind": "facets",
+  "out": "out/ex_facets",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：三渠道的月度活跃（缺失处断开）",
+  "note": "示例数据；缺失月份不补零，用虚线标注",
+  "data": {
+    "path": "facets.csv"
+  },
+  "params": {
+    "facet": "channel",
+    "x": "month",
+    "y": "active",
+    "ncol": 3
+  }
+}

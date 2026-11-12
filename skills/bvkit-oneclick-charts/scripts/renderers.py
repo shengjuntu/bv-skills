@@ -104,8 +104,8 @@ def render_matrix(rows, p, spec, meta):
     rcol, ccol, vcol = p.get("rows"), p.get("cols"), p.get("value")
     if not (rcol and ccol and vcol):
         raise BVSpecError("matrix needs params.rows/cols/value")
-    rl = sorted({str(r[rcol]) for r in rows}, key=_natural_key)
-    cl = sorted({str(r[ccol]) for r in rows}, key=_natural_key)
+    rl = _axis_order([str(r[rcol]) for r in rows])
+    cl = _axis_order([str(r[ccol]) for r in rows])
     M = np.full((len(rl), len(cl)), np.nan)
     for r in rows:
         v = r.get(vcol)
@@ -116,14 +116,19 @@ def render_matrix(rows, p, spec, meta):
     fig, axes = plt.subplots(1, n_panels, figsize=(5.6 * n_panels + 2.4, 5.4), squeeze=False)
     ax = axes[0][0]
     im = ax.imshow(M, cmap=p.get("cmap", "YlOrBr"))
+    ax.grid(False)
     for i in range(len(rl)):
         for j in range(len(cl)):
             if np.isnan(M[i, j]):
                 ax.text(j, i, "缺失", ha="center", va="center", fontsize=7, color="#777777")
             else:
-                ax.text(j, i, ("%g" % M[i, j]), ha="center", va="center", fontsize=8.2)
+                # 深色格用白字，浅色格用黑字，避免数值淹没在底色里
+                rgba = im.cmap(im.norm(M[i, j]))
+                lum = 0.299 * rgba[0] + 0.587 * rgba[1] + 0.114 * rgba[2]
+                ax.text(j, i, ("%g" % M[i, j]), ha="center", va="center", fontsize=8.2,
+                        color="#ffffff" if lum < 0.55 else "#222222")
     ax.set_xticks(range(len(cl)))
-    ax.set_xticklabels(cl, rotation=35, ha="right", fontsize=8.5)
+    ax.set_xticklabels([_axis_label(c) for c in cl], rotation=35, ha="right", fontsize=8.5)
     ax.set_yticks(range(len(rl)))
     ax.set_yticklabels(rl, fontsize=8.5)
     ax.set_title(p.get("title") or "实际覆盖", loc="left", fontsize=10)
@@ -143,15 +148,17 @@ def render_matrix(rows, p, spec, meta):
         ax2 = axes[0][1]
         from matplotlib.colors import ListedColormap
         ax2.imshow(E, cmap=ListedColormap(["#ffffff", "#2e7d32"]), vmin=0, vmax=1)
+        ax2.grid(False)
         for i, r in enumerate(rl):
             for j, c in enumerate(cl):
                 if E[i, j] and np.isnan(M[i, j]):
                     holes.append((r, c))
                     ax2.add_patch(plt.Rectangle((j - 0.5, i - 0.5), 1, 1, fill=False,
                                                 edgecolor="#c23b22", lw=2.0))
-                    ax2.text(j, i, "空洞", ha="center", va="center", fontsize=7.5, color="#c23b22")
+                    ax2.text(j, i, "空洞", ha="center", va="center", fontsize=7.5, color="#c23b22",
+                             bbox=dict(boxstyle="round,pad=0.18", fc="white", ec="#c23b22", lw=0.8))
         ax2.set_xticks(range(len(cl)))
-        ax2.set_xticklabels(cl, rotation=35, ha="right", fontsize=8.5)
+        ax2.set_xticklabels([_axis_label(c) for c in cl], rotation=35, ha="right", fontsize=8.5)
         ax2.set_yticks(range(len(rl)))
         ax2.set_yticklabels(rl, fontsize=8.5)
         ax2.set_title("期望关系（红框=实际空洞）", loc="left", fontsize=10)
@@ -170,6 +177,22 @@ def render_matrix(rows, p, spec, meta):
 def _natural_key(s):
     import re
     return [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", str(s))]
+
+
+def _axis_order(vals):
+    """数值轴按数值升序，文本轴按首次出现顺序（中文不按码点排）。"""
+    uniq = list(dict.fromkeys(vals))
+    try:
+        return sorted(uniq, key=lambda s: float(s))
+    except (TypeError, ValueError):
+        return uniq
+
+
+def _axis_label(s):
+    try:
+        return "%g" % float(s)
+    except (TypeError, ValueError):
+        return s
 
 
 # ---------------------------------------------------------------- network
@@ -238,6 +261,9 @@ def render_smallmultiples(rows, p, spec, meta):
     if not (facet and x and y):
         raise BVSpecError("smallmultiples needs params.facet/x/y")
     cats = sorted({str(r[facet]) for r in rows}, key=_natural_key)
+    # 全数据集的 x 值域：某个 facet 少这一格，无论是因为整行缺失还是 y 为空，都要标出来，
+    # 否则折线会跨过缺点直连，看起来像插值过
+    xdom = sorted({float(r[x]) for r in rows if isinstance(r.get(x), float)})
     ncol = int(p.get("ncol", 3))
     nrow = int(np.ceil(len(cats) / ncol))
     fig, axes = plt.subplots(nrow, ncol, figsize=(4.5 * ncol, 3.0 * nrow + 0.6),
@@ -247,20 +273,23 @@ def render_smallmultiples(rows, p, spec, meta):
         ax = axes[k // ncol][k % ncol]
         seq = [(r[x], r[y] if isinstance(r.get(y), float) else float("nan"))
                for r in rows if str(r[facet]) == c and isinstance(r.get(x), float)]
-        seq.sort()
+        have = {r[x] for r in rows
+                if str(r[facet]) == c and isinstance(r.get(x), float) and isinstance(r.get(y), float)}
+        miss_x = sorted(set([r[x] for r in rows if str(r[facet]) == c and not isinstance(r.get(y), float)])
+                        | {v for v in xdom if v not in have})
+        # 缺失处插入 NaN 点，让折线真的断开，而不是跨过缺失格直连
+        seq = sorted(seq + [(a, float("nan")) for a in miss_x if a not in have])
         if seq:
             xs, ys = zip(*seq)
-            # nan 让折线在未采集处断开，而不是跨点直连（避免视觉插值）
             ax.plot(xs, ys, lw=1.8, color="#1f4e79", marker="o", ms=3)
-        miss = [(r[x], r[y]) for r in rows if str(r[facet]) == c and not isinstance(r.get(y), float)]
-        for a, _b in miss:
+        for a in miss_x:
             ax.axvline(a, color="#bbbbbb", ls=":", lw=1.2, zorder=1)
             missing_pts.append((c, a))
-        if miss:
-            miss_by_cat[c] = [("%g" % a) for a, _ in miss]
+        if miss_x:
+            miss_by_cat[c] = [("%g" % a) for a in miss_x]
             ax.text(0.02, 0.94, "未采集：%s" % "、".join(miss_by_cat[c]), transform=ax.transAxes,
                     fontsize=7, color="#777777", va="top")
-        ax.set_title("%s%s" % (c, "（含未采集）" if miss else ""), fontsize=9)
+        ax.set_title("%s%s" % (c, "（含未采集）" if miss_x else ""), fontsize=9)
         shown += 1
     for k in range(len(cats), nrow * ncol):
         axes[k // ncol][k % ncol].axis("off")
@@ -379,7 +408,15 @@ def render_volume(rows, p, spec, meta):
 def render_multimodal(rows, p, spec, meta):
     import matplotlib.pyplot as plt
     _seed()
+
+    def _num(v):
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            raise BVError("multimodal 的 value 必须是数值，收到 %r（csv 里不要加单位或千分位）" % (v,))
+
     metrics = p.get("metrics") or [{"name": r.get("name"), "value": r.get("value")} for r in rows]
+    metrics = [{"name": m.get("name"), "value": _num(m.get("value"))} for m in metrics]
     base = float(p.get("pitch_base", 220.0))
     gain = float(p.get("pitch_gain", 4.0))
     pitch = [base + gain * m["value"] for m in metrics]
@@ -396,7 +433,7 @@ def render_multimodal(rows, p, spec, meta):
     a2.set_yticklabels([m["name"] for m in metrics], fontsize=9)
     for i, f in enumerate(pitch):
         a2.text(f + max(2, f * 0.005), i, "%dHz" % f, va="center", fontsize=8)
-    a2.set_title("(b) 声音映射：同一数值→音高", loc="left", fontsize=10)
+    a2.set_title("(b) 声音映射：音高 = %g + %g×值（Hz）" % (base, gain), loc="left", fontsize=10)
     a2.set_xlabel("频率 Hz")
     fig.suptitle(p.get("title") or "视觉—声音互补映射", x=0.01, ha="left", fontsize=11)
     fig.tight_layout(rect=[0, 0, 1, 0.93])

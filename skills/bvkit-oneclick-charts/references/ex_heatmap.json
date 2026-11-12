@@ -1,0 +1,18 @@
+{
+  "kind": "heatmap",
+  "out": "out/ex_heatmap",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：区域×渠道的工单计数",
+  "note": "示例数据，n=9（计数之和 = 样本数）",
+  "data": {
+    "path": "heat_region.csv"
+  },
+  "params": {
+    "rows": "region",
+    "cols": "channel",
+    "value": "count",
+    "cmap": "YlOrBr"
+  }
+}

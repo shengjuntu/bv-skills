@@ -1,0 +1,18 @@
+{
+  "kind": "matrix",
+  "out": "out/ex_matrix",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：四个对象 × 四个指标的数值矩阵",
+  "note": "示例数据，n=16；配色在灰度下仍可分离",
+  "data": {
+    "path": "mtx_item.csv"
+  },
+  "params": {
+    "rows": "row",
+    "cols": "col",
+    "value": "value",
+    "cmap": "viridis"
+  }
+}

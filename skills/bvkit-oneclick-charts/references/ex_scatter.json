@@ -1,0 +1,22 @@
+{
+  "kind": "scatter",
+  "out": "out/ex_scatter",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：三个簇 + 一组稀疏点",
+  "note": "示例数据；稀疏点与簇分开标注",
+  "data": {
+    "path": "sc_cluster.csv"
+  },
+  "params": {
+    "x": "x",
+    "y": "y",
+    "cluster": "cluster",
+    "outlier_labels": [
+      "稀疏点"
+    ],
+    "x_label": "维度 1",
+    "y_label": "维度 2"
+  }
+}

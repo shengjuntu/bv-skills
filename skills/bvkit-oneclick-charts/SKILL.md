@@ -5,7 +5,7 @@ display_name_en: 'One-Click Data Charts'
 description: '把一份表格或一句话的作图意图变成一张带审计的静态图。当用户说"把这份数据画成趋势图/热图/网络图/分布图""这个数据该用什么图""出一张能核对口径的图""画图但别补零、别用双轴"时使用。数据格式支持 CSV/JSON/XLSX，一次可选 png/svg/pdf/wav/gif。不用于海报、插画、写实图片和纯装饰图。'
 description_zh: '给一份数据和一句"我想看什么"，直接出图并附审计旁注。类型按意图选（趋势、对比、关系、分布、占比、轨迹、切片、动画），不需要记章节号；双轴、补零、缺字体降级会被直接拦截。'
 description_en: 'Turns a table plus a plain-language chart intent into one audited static chart. Pick the type by intent (trend, comparison, relation, distribution, share, trajectory, slice, motion) with no chapter numbers. Dual axes, zero-filled gaps and silent font fallback are blocked.'
-version: '2.1.0'
+version: '2.1.1'
 author: 'shengjuntu'
 allowed-tools:
   - Bash
@@ -26,12 +26,13 @@ compatibility: 'python3.9+ 与 matplotlib、numpy；网络需 networkx，词云�
 
 ```bash
 python3 scripts/cli.py guide                    # 我该选哪种图？列出全部类型和所需数据
+python3 scripts/cli.py render --spec references/ex_trend.json   # 直接跑一份现成例子
 python3 scripts/cli.py render --spec my.json    # 出图 + 审计
 python3 scripts/cli.py review --spec my.json    # 只检查配置，不出图
 python3 scripts/cli.py selftest                 # 13 个内置样例 + 5 个反例
 ```
 
-最小的 spec 只要三样：**画什么（kind）、数据在哪、哪列是什么**。
+最小 spec 只要三样：**画什么（kind）、数据在哪、哪列是什么**。不想自己写，就照抄 `references/ex_<kind>.json` 再改 `data.path`。
 
 ```json
 {
@@ -65,6 +66,8 @@ python3 scripts/cli.py selftest                 # 13 个内置样例 + 5 个反�
 | 这图本身站不站得住 | `review` | 已有图或 spec（只出评审清单，不产图） |
 
 完整说明与所需数据可用 `python3 scripts/cli.py guide` 现场打印；某个类型的必做口径用 `python3 scripts/cli.py inspect trend`。
+
+**每种类型都配了一份能跑的例子**：`references/ex_<kind>.json` + 同目录下它自己的 csv。按“我想看什么”索引在 `references/examples.md`，每行写明数据长什么样、图上该看到什么、换成自己的数据要改哪几行。
 
 ## spec 格式
 

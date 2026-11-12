@@ -1,0 +1,17 @@
+{
+  "kind": "window_heatmap",
+  "out": "out/ex_window_heatmap",
+  "formats": [
+    "png"
+  ],
+  "title": "示例：区域 × 4 小时时间窗的访问量",
+  "note": "示例数据；窗口 = 4 小时，尺度 = 计数",
+  "data": {
+    "path": "win_zone.csv"
+  },
+  "params": {
+    "rows": "zone",
+    "cols": "hour",
+    "value": "count"
+  }
+}
