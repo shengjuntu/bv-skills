@@ -8,7 +8,7 @@ from core import BVError, VERSION, export, setup_style, write_audit
 from renderers import RENDERERS
 from renderers2 import render_scatter, render_wordcloud
 from review import format_findings, review_audit, review_spec
-from routes import ROUTES, rules_for, route
+from routes import KINDS, ROUTES, kind_info, resolve_kind, rules_for, route
 from validate import load_table, print_report, to_audit_checks, validate
 
 ALL_RENDERERS = dict(RENDERERS)
@@ -22,13 +22,25 @@ def _load_spec(path):
 
 
 def _resolve(spec, spec_dir=None):
-    """Fill renderer from chapter route; load data.
+    """Fill renderer from the chart intent (kind/chart) or the chapter route; load data.
 
+    入口优先级：kind / chart > chapter。
     相对路径的 data.path 先按 cwd 找，找不到再按 spec 所在目录找（便于 examples 就地运行）。
     """
-    chapter = str(spec.get("chapter") or spec.get("params", {}).get("chapter") or "").zfill(2) if spec.get("chapter") else None
+    kind = spec.get("kind") or spec.get("chart")
+    chapter = None
+    if kind:
+        try:
+            chapter = resolve_kind(kind)
+        except KeyError as e:
+            raise BVError(str(e.args[0]))
+    elif spec.get("chapter"):
+        chapter = str(spec.get("chapter")).zfill(2)
     if chapter is None:
-        raise BVError("spec needs 'chapter' (01-20)")
+        raise BVError(
+            "spec 需要一个图表类型：'kind'（推荐，如 trend/heatmap/network/facets）"
+            "或 'chapter'（01-20）。跑 guide 子命令看全部 kind。"
+        )
     renderer = spec.get("renderer")
     if not renderer:
         renderer, _task = route(chapter)
@@ -56,8 +68,29 @@ def cmd_list(args):
     return 0
 
 
+def cmd_guide(args):
+    """按“你想看什么”列图表类型，不要求记章节号。"""
+    print("按你想画的东西选 kind（章节号只是内部实现，不用记）\n")
+    print("%-14s | %s" % ("kind", "你需要有什么数据 -> 画出来是什么"))
+    print("-" * 78)
+    for k in sorted(KINDS):
+        ch, need, desc = KINDS[k]
+        print("%-14s | %s -> %s" % (k, need, desc))
+    print("\n最小 spec（把 kind 换掉就能画别的）：")
+    print('  {"kind": "trend", "out": "out/trend", "data": {"path": "my.csv"},')
+    print('   "params": {"x": "month", "series": [{"name": "销量", "y": "value"}]}}')
+    print("  python3 scripts/cli.py render --spec my.json")
+    print("\n拿不准就用 review（只出评审清单，不产图）。")
+    return 0
+
+
 def cmd_inspect(args):
-    ch = str(args.chapter).zfill(2)
+    t = str(args.target).strip()
+    if t.lower() in KINDS:
+        ch = resolve_kind(t)
+        print("kind %s -> chapter %s" % (t.lower(), ch))
+    else:
+        ch = t.zfill(2)
     rd, task = route(ch)
     print("chapter %s -> renderer %s" % (ch, rd))
     print("task: %s" % task)
@@ -74,6 +107,11 @@ def RULE_DOC_TEXT(rule):
 
 def cmd_validate(args):
     spec = _load_spec(args.spec) if args.spec else {}
+    if spec.get("kind") or spec.get("chart"):
+        try:
+            spec = dict(spec, chapter=resolve_kind(spec.get("kind") or spec.get("chart")))
+        except KeyError as e:
+            raise BVError(str(e.args[0]))
     data = spec.get("data") or {}
     path = args.data or data.get("path")
     if not path:
@@ -106,7 +144,7 @@ def cmd_render(args):
             print_report(report, sys.stderr)
             return 2
 
-    findings = review_spec(dict(spec, renderer=renderer), report)
+    findings = review_spec(dict(spec, renderer=renderer, chapter=chapter), report)
     blocking = [f for f in findings if f["level"] == "error"]
     if blocking and not args.force:
         print("评审未通过，拒绝渲染（--force 可跳过）:", file=sys.stderr)
@@ -120,7 +158,7 @@ def cmd_render(args):
     p.setdefault("note", spec.get("note"))
     if renderer == "wordcloud":
         p.setdefault("font_path", style["font_path"])
-    fig, audit = ALL_RENDERERS[renderer](rows, p, spec, meta)
+    fig, audit = ALL_RENDERERS[renderer](rows, p, dict(spec, chapter=chapter), meta)
     formats = spec.get("formats") or ["png"]
     written = export(fig, out, formats=formats)
 
@@ -147,6 +185,11 @@ def cmd_render(args):
 
 def cmd_review(args):
     spec = _load_spec(args.spec)
+    if spec.get("kind") or spec.get("chart"):
+        try:
+            spec = dict(spec, chapter=resolve_kind(spec.get("kind") or spec.get("chart")))
+        except KeyError as e:
+            raise BVError(str(e.args[0]))
     data = spec.get("data") or {}
     report = None
     if data.get("path"):
@@ -169,10 +212,13 @@ def build_parser():
     ap = argparse.ArgumentParser(prog="bvkit", description="one-click chapter charting with built-in audit (%s)" % VERSION)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("list", help="20 章 -> renderer 映射").set_defaults(func=cmd_list)
+    sub.add_parser("list", help="章节 -> 图表族 映射（回查用）").set_defaults(func=cmd_list)
 
-    ins = sub.add_parser("inspect", help="看某章的路由与口径规则")
-    ins.add_argument("chapter")
+    gd = sub.add_parser("guide", help="按'你想画什么'选图表类型（推荐入口，不用记章节）")
+    gd.set_defaults(func=cmd_guide)
+
+    ins = sub.add_parser("inspect", help="看某个图表类型或某章的口径必做项")
+    ins.add_argument("target", help="kind（如 trend）或章节号（如 02）")
     ins.set_defaults(func=cmd_inspect)
 
     val = sub.add_parser("validate", help="只做数据核验")

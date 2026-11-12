@@ -1,92 +1,105 @@
 ---
 name: bvkit-oneclick-charts
-display_name: 'bvkit 一键出图'
-display_name_en: 'bvkit One-Click Charts'
-description: '把 20 章“美丽可视化”方法压缩成 10 个渲染器的一键出图工具。当用户需要做数据可视化、选择图表类型、按 bv-02/07/14 那种图出图，或需要一张带口径审计（0 基线、无双轴、缺失标注、确定性种子）的图时使用。不用于海报、插画、写实图片和纯装饰图。'
-description_zh: '输入一份 CSV 或 JSON 加一个章节号，输出一张带审计旁注的静态图。内置 20 章口径规则，双轴、补零、缺字体降级会被直接拦截。'
-description_en: 'Turns a CSV or JSON plus a chapter number into one audited static chart. Built-in rules block dual axes, zero-filling missing cells and silent font fallback.'
-version: '2.0.0'
+display_name: '数据图表一键出图'
+display_name_en: 'One-Click Data Charts'
+description: '把一份表格或一句话的作图意图变成一张带审计的静态图。当用户说"把这份数据画成趋势图/热图/网络图/分布图""这个数据该用什么图""出一张能核对口径的图""画图但别补零、别用双轴"时使用。数据格式支持 CSV/JSON/XLSX，一次可选 png/svg/pdf/wav/gif。不用于海报、插画、写实图片和纯装饰图。'
+description_zh: '给一份数据和一句"我想看什么"，直接出图并附审计旁注。类型按意图选（趋势、对比、关系、分布、占比、轨迹、切片、动画），不需要记章节号；双轴、补零、缺字体降级会被直接拦截。'
+description_en: 'Turns a table plus a plain-language chart intent into one audited static chart. Pick the type by intent (trend, comparison, relation, distribution, share, trajectory, slice, motion) with no chapter numbers. Dual axes, zero-filled gaps and silent font fallback are blocked.'
+version: '2.1.0'
 author: 'shengjuntu'
 allowed-tools:
   - Bash
   - Read
   - Write
-examples_zh: ['把带事件标注的月度数据画成时间序列（第 02 章）', '把人员共现表画成投影网络并过滤弱连接（第 07 章）', '把期望与实际关系表画成矩阵并标出空洞（第 14 章）']
-examples_en: ['Render a monthly series with event markers (chapter 02)', 'Draw a co-occurrence projection network with a weight threshold (chapter 07)', 'Render an expected-vs-actual relation matrix and flag holes (chapter 14)']
+examples_zh: ['把这份月度销量表画成带事件标注的趋势图', '把这张人员共现表画成网络图，把只出现一次的弱连接过滤掉', '把期望和实际的对照表画成矩阵，把空着的格子标出来']
+examples_en: ['Turn this monthly sales table into a trend chart with event markers', 'Draw this co-occurrence table as a network and filter one-off links', 'Render this expected-vs-actual table as a matrix and mark the empty cells']
 compatibility: 'python3.9+ 与 matplotlib、numpy；网络需 networkx，词云需 wordcloud；需系统 CJK 字体（缺失直接报 BV_FONT 中止）。'
 ---
 
-# bvkit 一键出图
+# 数据图表一键出图
 
-## 它是什么
+## 一句话
 
-原 20 章方法是纯文档（0 个可执行文件），执行靠人读懂再手写脚本。bvkit 把其中**可判定的部分**固化成代码：
+给一份数据 + 一句“我想看什么”，出一张图，旁边附一份审计（用了什么口径、丢了什么、哪里没做）。
 
-| 层 | 作用 | 对应原来的问题 |
-| --- | --- | --- |
-| 数据核验 | 编码、类型、`2019.3` 年月、缺失、重复键、越界 | bv-02 月份错位、bv-13 补零、bv-15 完整性 |
-| 路由 | 章节号 → 渲染器，不用读文档选图 | 20 章不知道该用哪个图 |
-| 渲染 | 10 个渲染器，口径默认值内置 | bv-06 标签堆叠、bv-07 布局压团、bv-12 缺类别刻度、bv-18 无色标 |
-| 评审 | 渲染前静态拦截 + 渲染后规则复核 | bv-01 双轴/截断基线、bv-20 断言无证据 |
-| 审计 | 每张图旁边落一份 json + md | 无“必须标示例数据”的强制 |
-
-## 环境前置
+## 30 秒上手
 
 ```bash
-python3 -m pip install matplotlib numpy
-python3 -m pip install networkx wordcloud     # 仅 07/08/10 与 03 需要
-sudo apt-get install -y fonts-wqy-microhei    # 或把 ttc 放到 ~/.local/share/fonts/
+python3 scripts/cli.py guide                    # 我该选哪种图？列出全部类型和所需数据
+python3 scripts/cli.py render --spec my.json    # 出图 + 审计
+python3 scripts/cli.py review --spec my.json    # 只检查配置，不出图
+python3 scripts/cli.py selftest                 # 13 个内置样例 + 5 个反例
 ```
 
-无 sudo 时把字体文件放到 `~/.local/share/fonts/wqy-microhei.ttc` 即可；也可在 spec 里用 `font_path` 指定绝对路径。
-
-## 怎么调
-
-代码在 `scripts/`，入口是 `scripts/cli.py`，在**技能根目录**执行：
-
-```bash
-python3 scripts/cli.py list                        # 20 章 → renderer 映射
-python3 scripts/cli.py inspect 02                  # 某章的口径必做项
-python3 scripts/cli.py validate --data x.csv       # 只做数据核验
-python3 scripts/cli.py review --spec s.json        # 只做静态评审
-python3 scripts/cli.py render --spec s.json        # 核验 + 评审 + 出图 + 审计
-python3 scripts/cli.py selftest --workdir /tmp/bv  # 13 个内置样例 + 5 个反例
-```
-
-无需 `PYTHONPATH`、无需安装：`cli.py` 与同目录模块互相 import，Python 会把脚本所在目录放进 `sys.path`。从别处调用时用绝对路径 `python3 /path/to/skill/scripts/cli.py ...`。
-
-## spec 格式
+最小的 spec 只要三样：**画什么（kind）、数据在哪、哪列是什么**。
 
 ```json
 {
-  "chapter": "02",
-  "out": "out/bv02_story",
+  "kind": "trend",
+  "out": "out/sales",
+  "data": {"path": "sales.csv"},
+  "params": {"x": "month", "series": [{"name": "销量", "y": "value"}]}
+}
+```
+
+## 选哪种图（不需要记章节号）
+
+| 你想看什么 | `kind` | 你需要有什么数据 |
+| --- | --- | --- |
+| 随时间的走势 | `trend` | 一列时间 + 一列数值（可再加一列事件文字） |
+| 两个类别的交叉计数 | `heatmap` | 两列分类（或已交叉计数的三列） |
+| 期望和实际差在哪 | `compare` | 期望一组关系 + 实际一组，或两列期望/实际值 |
+| 多变量的整体形态 | `matrix` | 若干行若干列的多变量数值 |
+| 谁和谁一起出现 | `cooccurrence` | 实体成对出现，或共现计数 |
+| 按时间窗聚合的位置分布 | `window_heatmap` | 一列时间 + 一列位置/类别 |
+| 关系网络、谁连谁 | `network` | 两列节点（一行一条关系） |
+| 两期是否相似 | `similarity` | 两期相似度或两期指标 |
+| 分布与异常点 | `scatter` | 两列坐标，或两个可投影的数值 |
+| 分渠道/分类对比，缺口要看出来 | `facets` | 一列分类 + 一列时间 + 一列数值 |
+| 一条路怎么走的 | `route` | 一列顺序 + 两列坐标 |
+| 起点终点与路线 | `map` | 起点/终点/节点坐标 |
+| 词的重要性 | `wordcloud` | 一列词 + 一列权重 |
+| 三维数据内部长什么样 | `volume` | 三维网格数值 |
+| 过程怎么演变 | `animation` | 逐帧实体位置或状态 |
+| 数值与声音怎么对应 | `soundmap` | 一列数值序列 |
+| 这图本身站不站得住 | `review` | 已有图或 spec（只出评审清单，不产图） |
+
+完整说明与所需数据可用 `python3 scripts/cli.py guide` 现场打印；某个类型的必做口径用 `python3 scripts/cli.py inspect trend`。
+
+## spec 格式
+
+必填三项：`kind`（或 `chapter`，见下文）、`out`、`data`。
+
+```json
+{
+  "kind": "trend",
+  "out": "out/sales",
   "formats": ["png", "svg"],
-  "title": "用户规模与政策节点",
+  "title": "销量与促销节点",
   "note": "示例数据，n=5",
   "date_format": "ym",
-  "date_columns": ["ym"],
-  "data": {"path": "data/story.csv"},
+  "date_columns": ["month"],
+  "data": {"path": "sales.csv"},
   "params": {
-    "x": "ym",
-    "series": [{"name": "规模", "y": "v"}],
-    "events": {"col": "event", "at": "ym", "cat": "cat"}
+    "x": "month",
+    "series": [{"name": "销量", "y": "value"}],
+    "events": {"col": "event", "at": "month", "cat": "cat"}
   }
 }
 ```
 
-- `chapter` 必填（01-20），决定 renderer；`renderer` 可显式覆盖。
-- `data` 三选一：`{"path": "x.csv"}`、`{"path": "x.json", "sheet": "S1"}`、`{"rows": [...]}`。
-- `data.path` 相对 spec 所在目录解析（先试 cwd），所以示例可直接跑。
-- `out` 不要带扩展名；`formats` 决定导出 png/svg/pdf。
+- `data` 三选一：`{"path": "x.csv"}`、`{"path": "x.xlsx", "sheet": "S1"}`、`{"rows": [...]}`。
+- `data.path` 相对 spec 所在目录解析（先试 cwd），所以 spec 和 csv 放一起就能直接跑。
+- `out` 不要带扩展名；`formats` 决定导出 png/svg/pdf（17 可加 wav，19 可加 gif）。
 - 退出码：0 成功；1 环境/参数错误；2 数据核验失败；3 评审拦截。`--force` 可越过 2/3，但审计留痕。
+- 要精确复刻某一章的方法时，把 `kind` 换成 `"chapter": "02"` 即可，两者等价（kind 只是一层更好懂的别名）。
 
-## 内置口径（不可通过参数关闭）
+## 内置口径（不通过参数关闭）
 
-这些不是默认值，是硬规则——违反报 `BV_SPEC` 或直接拒绝渲染：
+这些是硬规则，违反会报 `BV_SPEC` 或直接拒绝渲染：
 
 - 计数/规模类 **0 基线**；关闭必须给 `baseline_reason`。
-- **无双 y 轴**（不同量级拆面板）。
+- **无双 y 轴**（量级不同就拆面板）。
 - 缺失格 **文字/虚线标注，不补零**；小倍数缺失处折线断开。
 - 网络 0 度节点 **单列**，不混入布局。
 - 地图多轨迹共起点时 **只标一个“共起点”**，终点用编号 + 图例。
@@ -95,27 +108,9 @@ python3 scripts/cli.py selftest --workdir /tmp/bv  # 13 个内置样例 + 5 个�
 - 随机布局/词云/动画 **固定 seed=42**。
 - 字体缺失 → `BV_FONT` 报错并中止，不继续出图。
 
-## 20 章 → 渲染器
-
-| 章节 | renderer | 说明 |
-| --- | --- | --- |
-| 01 / 20 | review | 只输出评审清单，不产图（这两章产出的是文字结论） |
-| 02 / 11 | timeseries | 时间序列 + 事件面板（事件按真实时间对齐） |
-| 03 | wordcloud | 词云 + 右侧 Top-N 频次核对面板 |
-| 04 / 12 / 14 / 15 / 16 | matrix | 分类矩阵热图；14 额外给期望/实际双面板 |
-| 05 / 06 | geo | 轨迹图：编号 + 图例 + 时长面板 |
-| 07 / 08 / 10 | network | 投影网络；阈值可调，孤立节点单列 |
-| 09 | scatter | 投影散布 + 簇/异常点区分 |
-| 13 | smallmultiples | 小倍数 + 未采集虚线标注 |
-| 17 | multimodal | 视觉 + 音高映射（可写 wav） |
-| 18 | volume | 三正交切片 |
-| 19 | animation | GIF + 静态替代 |
-
-完整参数见 `references/params.md`，章节任务原文见 `references/chapters.md`，可跑示例见 `references/examples.md`（spec 与数据都在 `references/` 下平铺）。
-
 ## 审计产物
 
-每张图旁边生成：
+每张图旁边生成两个文件：
 
 - `<out>.audit.json` — 机器读：`chapter/renderer/output/data_source/n_records/checks/dropped/missing/params/limits`
 - `<out>.audit.md` — 人读：校验项表格 + 丢弃项 + 限制声明
@@ -127,19 +122,33 @@ python3 scripts/cli.py selftest --workdir /tmp/bv  # 13 个内置样例 + 5 个�
  "date_columns": 1, "seed": 42, "font": "WenQuanYi Micro Hei", "rows": 5}
 ```
 
+## 想回查章节
+
+`kind` 与章节是一一映射，`python3 scripts/cli.py list` 打印全表；`inspect 02` 与 `inspect trend` 输出同一组口径规则。章节只在 `audit.json` 里留作溯源，不是使用前提。
+
 ## 出错怎么办
 
 | 码 | 含义 | 处理 |
 | --- | --- | --- |
 | `BV_FONT` | 找不到 CJK 字体 | 装 fonts-wqy-microhei，或 spec 里给 `font_path` |
 | `BV_DATA` | 文件缺失/编码无法识别/空表/JSON 结构不对 | 按提示换文件或转码 |
-| `BV_SPEC` | 缺 params 必需字段、renderer 不认识、依赖未装 | 按提示补字段或装依赖 |
+| `BV_SPEC` | 缺 params 必需字段、kind 不认识、依赖未装 | 按提示补字段或装依赖 |
 | 退出码 2 | 数据核验有 error（重复主键等） | 看 stdout 的 issues；确认无误再 `--force` |
 | 退出码 3 | 评审拦截（双轴、无理由截断基线、动画无静态替代） | 改配置；不要用 `--force` 掩盖 |
 
+## 环境前置
+
+```bash
+python3 -m pip install matplotlib numpy
+python3 -m pip install networkx wordcloud     # 仅 network/cooccurrence 与 wordcloud 需要
+sudo apt-get install -y fonts-wqy-microhei    # 或把 ttc 放到 ~/.local/share/fonts/
+```
+
+无 sudo 时把字体文件放到 `~/.local/share/fonts/wqy-microhei.ttc` 即可；也可在 spec 里用 `font_path` 指定绝对路径。
+
 ## 权限与数据用途
 
-- 只读：spec 指定的 csv/json/xlsx 数据文件、`references/` 下的模板与参数表。
+- 只读：spec 指定的 csv/json/xlsx 数据文件、`references/` 下的参数表与示例。
 - 只写：spec 里 `out` 指定的输出前缀（`.png/.svg/.pdf/.wav/.gif` 与 `.audit.json/.audit.md`）。
 - 不联网：无 HTTP 请求、无遥测、不上传数据。
 - 不读用户目录之外的内容；不写系统路径。
@@ -147,6 +156,6 @@ python3 scripts/cli.py selftest --workdir /tmp/bv  # 13 个内置样例 + 5 个�
 
 ## 边界（明确不做）
 
-- 01/20 不产图：它们的方法是评审与论证审计，输出是结论。
+- `review` 不产图：它的产出是评审清单与改版建议。
 - 不做交互式图表（D3/ECharts）：本包交付静态图 + 审计。
-- 不做“数据→任意图表类型”的通用绘图：图类型由章节决定，避免口径漂移。
+- 不做“任意数据 → 任意图”的通用绘图：类型由 `kind` 决定，避免口径漂移。

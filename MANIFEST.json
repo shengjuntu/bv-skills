@@ -1,6 +1,6 @@
 {
   "name": "bv-skills",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "date": "2026-11-12",
   "lang": "zh-CN",
   "derived_from": "beautiful-visualization-skills-v1.0.0",
@@ -8,11 +8,14 @@
   "skills": [
     {
       "name": "bvkit-oneclick-charts",
+      "display_name": "数据图表一键出图",
       "path": "skills/bvkit-oneclick-charts",
       "entry": "SKILL.md",
       "runtime": "python3",
       "renderers": 10,
-      "cli": ["list", "inspect", "validate", "review", "render", "selftest"]
+      "cli": ["guide", "list", "inspect", "validate", "review", "render", "selftest"],
+      "entry_style": "按图表意图（kind）调用；chapter 仅作内部溯源与精确复刻入口",
+      "kinds": 17
     }
   ],
   "layout": {
@@ -43,7 +46,30 @@
       "published_at": "2026-11-12 21:41",
       "review_window": "7 个工作日（实际当日通过）",
       "developer": "上海老涂"
-    }
+    },
+    "updates": [
+      {
+        "version": "2.1.0",
+        "display_name": "数据图表一键出图",
+        "date": "2026-11-12",
+        "why": "原名称与说明以「第几章」为入口，使用者不知道该选哪一章",
+        "changes": [
+          "新增 kind 意图层：17 个 kind 一一映射到 chapter，spec 可只写 kind 不写 chapter",
+          "新增 `guide` 子命令：按「你想看什么」列全部 kind 与所需数据",
+          "`inspect` 接受 kind 或章节号；validate/review/render 三处均注入解析出的 chapter，避免 kind 用法丢掉口径复核",
+          "display_name 改为「数据图表一键出图」，中英描述改为意图触发词，examples 改为自然语言诉求",
+          "新增 references/ex_kind_trend.json 演示 kind 用法；版本升 2.1.0"
+        ],
+        "unchanged": "name 保持 bvkit-oneclick-charts，以免破坏已发布资产的版本更新关系"
+      }
+    ]
+  },
+  "kind_map": {
+    "trend": "02", "heatmap": "12", "compare": "14", "matrix": "04",
+    "cooccurrence": "15", "window_heatmap": "16", "network": "07",
+    "similarity": "08", "scatter": "09", "facets": "13", "route": "06",
+    "map": "05", "wordcloud": "03", "volume": "18", "animation": "19",
+    "soundmap": "17", "review": "01"
   },
   "chapter_map": {
     "01": "review", "02": "timeseries", "03": "wordcloud", "04": "matrix",
@@ -66,7 +92,7 @@
     "selftest_samples": 13,
     "negative_checks": 5,
     "rounds": 7,
-    "final": "13/13 pass, 5/5 negative pass, 5 examples exit=0, 27/27 sha256 OK on clean checkout",
-    "workbuddy_package": "root=SKILL.md; check_skill PASS; selftest 13/13; 5 examples exit=0"
+    "final": "13/13 pass, 5/5 negative pass, 6 examples exit=0, 25/25 sha256 OK on clean checkout",
+    "workbuddy_package": "root=SKILL.md; check_skill PASS; selftest 13/13; 6 examples exit=0; kind 路径出图并触发 3 条口径复核"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "kind": "trend",
+  "out": "out/kd_trend",
+  "formats": ["png"],
+  "title": "用 kind 直接出图（不需要记章节号）",
+  "note": "示例数据（5 个时间点）；本文件只写 kind，不写 chapter",
+  "date_format": "ym",
+  "date_columns": ["ym"],
+  "data": {"path": "narrative.csv"},
+  "params": {
+    "x": "ym",
+    "series": [{"name": "月活（万）", "y": "v"}],
+    "events": {"col": "event", "at": "ym", "cat": "cat"},
+    "y_label": "万"
+  }
+}
