@@ -1,0 +1,36 @@
+{
+  "name": "bv-skills",
+  "version": "2.0.0",
+  "date": "2026-11-12",
+  "lang": "zh-CN",
+  "derived_from": "beautiful-visualization-skills-v1.0.0",
+  "chapters": 20,
+  "skills": [
+    {
+      "name": "bvkit-oneclick-charts",
+      "path": "skills/bvkit-oneclick-charts",
+      "entry": "SKILL.md",
+      "runtime": "python3",
+      "renderers": 10,
+      "cli": ["list", "inspect", "validate", "review", "render", "selftest"]
+    }
+  ],
+  "chapter_map": {
+    "01": "review", "02": "timeseries", "03": "wordcloud", "04": "matrix",
+    "05": "geo", "06": "geo", "07": "network", "08": "network",
+    "09": "scatter", "10": "network", "11": "timeseries", "12": "matrix",
+    "13": "smallmultiples", "14": "matrix", "15": "matrix", "16": "matrix",
+    "17": "multimodal", "18": "volume", "19": "animation", "20": "review"
+  },
+  "requirements": {
+    "required": ["python>=3.9", "matplotlib", "numpy"],
+    "optional": {"networkx": "07/08/10", "wordcloud": "03", "pandas+openpyxl": "xlsx 输入"},
+    "fonts": "任一 CJK 字体（wqy-microhei / Noto CJK / msyh）"
+  },
+  "verification": {
+    "selftest_samples": 13,
+    "negative_checks": 5,
+    "rounds": 5,
+    "final": "13/13 pass, 5/5 negative pass, 13 png 目检通过"
+  }
+}

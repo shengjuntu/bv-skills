@@ -1,0 +1,8 @@
+{
+  "chapter": "13",
+  "out": "out/bv13_facets",
+  "title": "三种渠道的月度活跃（A 缺 3 月，B 缺 7 月，C 缺 1 月）",
+  "note": "示例数据：缺失处折线断开，不补零",
+  "data": {"path": "data/facets.csv"},
+  "params": {"facet": "channel", "x": "month", "y": "active", "ncol": 3}
+}

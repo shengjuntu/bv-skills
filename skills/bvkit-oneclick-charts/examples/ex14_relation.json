@@ -1,0 +1,17 @@
+{
+  "chapter": "14",
+  "out": "out/bv14_relation",
+  "title": "业务流程期望关系 vs 实际记录",
+  "note": "示例数据：3 个期望关系在实际记录里缺失",
+  "data": {"path": "data/relation.csv"},
+  "params": {
+    "rows": "src",
+    "cols": "dst",
+    "value": "n",
+    "expected": {
+      "订单|评价": 1,
+      "商品|支付": 1,
+      "评价|来源": 1
+    }
+  }
+}
