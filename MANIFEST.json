@@ -52,6 +52,8 @@
         "version": "2.1.0",
         "display_name": "数据图表一键出图",
         "date": "2026-11-12",
+        "status": "审核中（22:05 提交，预计 7 个工作日）",
+        "asset_id": "os_d3402337d1449c2e（沿用，未新建资产）",
         "why": "原名称与说明以「第几章」为入口，使用者不知道该选哪一章",
         "changes": [
           "新增 kind 意图层：17 个 kind 一一映射到 chapter，spec 可只写 kind 不写 chapter",
