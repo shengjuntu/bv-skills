@@ -85,7 +85,7 @@
         "version": "2.1.1",
         "display_name": "数据图表一键出图",
         "date": "2026-11-12",
-        "status": "未提交（GitHub 先行；市场侧 v2.1.0 仍在审核）",
+        "status": "已提交审核 2026-11-12 23:51（v2.1.0 于 22:38 发布，故无需撤回，直接走更新版本）",
         "why": "例子只覆盖 5 个类型，且是补充样例而非说明书",
         "changes": [
           "17 个 kind 各一份可跑 spec（references/ex_<kind>.json + 自带 csv），另保留 1 份 chapter 写法，共 18 份",
@@ -100,7 +100,9 @@
         ],
         "unchanged": "name 保持 bvkit-oneclick-charts；kind_map / chapter_map 不变"
       }
-    ]
+    ],
+    "current": "v2.0.0 / v2.1.0 已发布；v2.1.1 审核中（同一资产 os_d3402337d1449c2e）",
+    "note": "v2.1.1 提交时 v2.1.0 已审核通过，市场侧没有审核中的版本占位，因此直接更新；审核通过前，市场安装到的是 v2.1.0（6 份示例），与本仓库的 18 份示例不一致"
   },
   "kind_map": {
     "trend": "02",
